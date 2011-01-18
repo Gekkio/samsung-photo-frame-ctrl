@@ -10,6 +10,7 @@ Features
 
 * If a photo frame is in mass storage mode, the program will change it into mini display mode.
 * If a photo frame is in mini display mode, the program will send the jpeg that was specified as the program argument to the photo frame. *The JPEG must be prescaled to the exactly correct size!*
+* window-in-frame.sh which shows a user selected application window in the photo frame (needs Imagemagick!)
 
 Supported photo frames
 ----------------------
@@ -26,7 +27,21 @@ Dependencies
 Usage
 -----
 
+### Show JPEG image with the exactly correct size in photo frame
+
 `sudo ./frame-ctrl.py my_correctly_scaled_image.jpg`
+
+or
+
+`cat my_correctly_scaled_image.jpg | sudo ./frame-ctrl.py`
+
+### Automatically scale an image and show it in the photo frame (needs Imagemagick). _Replace 800x480 with the correct resolution for your device_
+
+`cat some_image_supported_by_imagemagick | convert - -resize 800x480 - | montage - -background black -geometry 800x480 jpeg:- | sudo ./frame-ctrl.py`
+
+### Show an application window in photo frame (needs Imagemagick). _Replace 800x480 in window-in-frame.sh with the correct resolution for your device_
+
+`sudo ./window-in-frame.sh` and click on an application window to select it
 
 FAQ
 ---
