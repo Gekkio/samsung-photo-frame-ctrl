@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import struct
 import sys
 import time
 import usb.core
@@ -36,45 +37,43 @@ def displayModeSetup(dev):
 #  result = dev.ctrl_transfer(CTRL_TYPE_VENDOR | CTRL_IN | CTRL_RECIPIENT_DEVICE, 0x02, 0x00, 0x00, 1)
 #  expect(result, [ 0x46 ])
 
+def paddedBytes(buf, size):
+  diff = size - len(buf)
+  return buf + bytes(b'\x00') * diff
+
 def chunkyWrite(dev, buf):
   pos = 0
   while pos < bufferSize:
     dev.write(0x02, buf[pos:pos+chunkSize])
     pos += chunkSize
 
-def writeImage(dev, path):
+def writeImage(dev):
 #  result = dev.ctrl_transfer(CTRL_TYPE_STANDARD | CTRL_IN | CTRL_RECIPIENT_DEVICE, 0x06, 0x0300, 0x00, 255)
 #  expect(result, [ 0x04, 0x03, 0x09, 0x04 ])
 
 #  result = dev.ctrl_transfer(CTRL_TYPE_STANDARD | CTRL_IN | CTRL_RECIPIENT_DEVICE, 0x06, 0x0301, 0x0409, 255)
 
-  size = os.path.getsize(path)
-  f = open(path)
+  if len(sys.argv) < 2 or sys.argv[1] == "-":
+    content = sys.stdin.read()
+  else:
+    f = open(sys.argv[1])
+    content = f.read()
+    f.close()
 
-  buf = bytearray(bufferSize)
+  size = struct.pack('I', len(content))
+  header = b'\xa5\x5a\x09\x04' + size + b'\x46\x00\x00\x00'
 
-  header = bytearray([ 0xa5, 0x5a, 0x09, 0x04, size & 0xff, size >> 8 & 0xff, size >> 16 & 0xff, size >> 24 & 0xff, 0x46, 0x00, 0x00, 0x00 ])
+  content = header + content
 
-  headerSize = len(header)
-
-  data = f.read(bufferSize - headerSize)
-  buf[0:headerSize] = header
-  buf[headerSize:headerSize + len(data)] = data
-  chunkyWrite(dev, buf)
-  
-  while True:
-    data = f.read(bufferSize)
-    if data == "":
-      break    
-    buf[0:len(data)] = data
-    for i in xrange(len(data), len(buf)):
-      buf[i] = 0
+  pos = 0
+  while pos < len(content):
+    buf = paddedBytes(content[pos:pos+bufferSize], bufferSize)
     chunkyWrite(dev, buf)
+    pos += bufferSize
 
+  
 #  result = dev.ctrl_transfer(CTRL_TYPE_VENDOR | CTRL_IN | CTRL_RECIPIENT_DEVICE, 0x06, 0x00, 0x00, 2)
 #  expect(result, [ 0x00, 0x00 ])
-
-  f.close()
 
 for k, v in models.iteritems():
   dev = usb.core.find(idVendor=vendorId, idProduct=v[0])
@@ -86,4 +85,4 @@ for k, v in models.iteritems():
   if dev:
     print "Found " + k + " in display mode"
     displayModeSetup(dev)
-    writeImage(dev, sys.argv[1])
+    writeImage(dev)
