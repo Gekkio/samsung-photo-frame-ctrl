@@ -7,7 +7,7 @@ import usb.core
 from usb.util import *
 
 vendorId = 0x04e8
-models = {'SPF-87H': (0x2033, 0x2034) }
+models = {'SPF-87H': (0x2033, 0x2034), 'SPF-107H': (0x2027, 0x2028) }
 
 chunkSize = 0x4000
 bufferSize = 0x20000
