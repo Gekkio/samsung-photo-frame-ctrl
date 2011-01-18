@@ -29,7 +29,6 @@ def storageToDisplay(dev):
 
 def displayModeSetup(dev):
   print "Sending setup commands to device"
-  dev.set_configuration()
   result = dev.ctrl_transfer(CTRL_TYPE_VENDOR | CTRL_IN | CTRL_RECIPIENT_DEVICE, 0x04, 0x00, 0x00, 1)
   expect(result, [ 0x03 ])
 #  result = dev.ctrl_transfer(CTRL_TYPE_VENDOR | CTRL_IN | CTRL_RECIPIENT_DEVICE, 0x01, 0x00, 0x00, 2)
@@ -83,11 +82,14 @@ for k, v in models.iteritems():
     print "Found " + k + " in storage mode"
     storageToDisplay(dev)
     time.sleep(1)
+    dev = usb.core.find(idVendor=vendorId, idProduct=v[1])
+    displayModeSetup(dev)
     found = True
-  dev = usb.core.find(idVendor=vendorId, idProduct=v[1])
+  if not dev:
+    dev = usb.core.find(idVendor=vendorId, idProduct=v[1])
   if dev:
     print "Found " + k + " in display mode"
-    displayModeSetup(dev)
+    dev.set_configuration()
     writeImage(dev)
     found = True
 
