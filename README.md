@@ -21,7 +21,7 @@ Supported photo frames
 Dependencies
 ------------
 
-* pyusb 1.0 (This is an alpha quality library so it is *not* the one usually packaged in linux distributions. For example, this is not python-usb in Ubuntu!)
+* [pyusb 1.0](http://sourceforge.net/apps/mediawiki/pyusb) (This is an alpha quality library so it is *not* the one usually packaged in linux distributions. For example, the package python-usb in Ubuntu won't work!)
 
 Usage
 -----
