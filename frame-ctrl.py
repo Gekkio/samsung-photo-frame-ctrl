@@ -16,7 +16,7 @@ bufferSize = 0x20000
 def expect(result, verifyList):
   resultList = result.tolist()
   if resultList != verifyList:
-    print "Warning: Expected " + str(verifyList) + " but got " + str(resultList)
+    print >> sys.stderr, "Warning: Expected " + str(verifyList) + " but got " + str(resultList)
 
 def storageToDisplay(dev):
   print "Setting device to display mode"
@@ -75,14 +75,22 @@ def writeImage(dev):
 #  result = dev.ctrl_transfer(CTRL_TYPE_VENDOR | CTRL_IN | CTRL_RECIPIENT_DEVICE, 0x06, 0x00, 0x00, 2)
 #  expect(result, [ 0x00, 0x00 ])
 
+found = False
+
 for k, v in models.iteritems():
   dev = usb.core.find(idVendor=vendorId, idProduct=v[0])
   if dev:
     print "Found " + k + " in storage mode"
     storageToDisplay(dev)
     time.sleep(1)
+    found = True
   dev = usb.core.find(idVendor=vendorId, idProduct=v[1])
   if dev:
     print "Found " + k + " in display mode"
     displayModeSetup(dev)
     writeImage(dev)
+    found = True
+
+if not found:
+  print >> sys.stderr, "No supported devices found"
+  sys.exit(-1)
