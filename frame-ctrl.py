@@ -83,13 +83,13 @@ for k, v in models.iteritems():
     storageToDisplay(dev)
     time.sleep(1)
     dev = usb.core.find(idVendor=vendorId, idProduct=v[1])
-    displayModeSetup(dev)
     found = True
   if not dev:
     dev = usb.core.find(idVendor=vendorId, idProduct=v[1])
   if dev:
     print "Found " + k + " in display mode"
     dev.set_configuration()
+    displayModeSetup(dev)
     writeImage(dev)
     found = True
 
